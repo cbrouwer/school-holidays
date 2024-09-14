@@ -1,1 +1,3 @@
-# school-holidays
+# Dutch School Holidays for Home Assistant
+
+##  
