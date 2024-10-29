@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import Throttle
 
-from .schooldaysapi import SchoolDaysApi
+from .holidays import HolidayRetriever
 from .const import (
     _LOGGER,
     MIN_TIME_BETWEEN_UPDATES,
@@ -44,7 +44,7 @@ class SchoolHolidaysData(object):
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        self.data = await SchoolDaysApi().get_holidays(self.region)
+        self.data = await HolidayRetriever().get_holidays(self.region)
 
 
 
@@ -87,5 +87,3 @@ class SchoolHolidays(Entity):
             today = datetime.today().date()
             _LOGGER.debug("Checking for holidays for %s in %s", str(today), str(self.data.data))
             self._state = any(today >= holiday.start_date  and today < holiday.end_date for holiday in self.data.data)
-
-

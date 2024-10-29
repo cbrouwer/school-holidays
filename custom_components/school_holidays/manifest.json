@@ -1,11 +1,9 @@
 {
   "codeowners": ["@cbrouwer"],
   "config_flow": true,
-  "dependencies": [],
   "documentation": "https://github.com/cbrouwer/school-holidays",
   "domain": "school_holidays",
   "iot_class": "cloud_polling",
   "name": "School Holidays",
-  "requirements": [],
   "version": "0.1.0"
 }
