@@ -28,7 +28,7 @@ async def async_setup_entry(
 
     region = config.get(CONF_REGION).strip()
 
-    data = SchoolHolidaysData(region)
+    data = SchoolHolidaysData(hass, region)
     await data.async_update()
 
     entities = []
@@ -38,13 +38,14 @@ async def async_setup_entry(
 
 
 class SchoolHolidaysData(object):
-    def __init__(self, region):
+    def __init__(self, hass: HomeAssistant, region: str):
         self.data = None
+        self.hass = hass
         self.region = region
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        self.data = await HolidayRetriever().get_holidays(self.region)
+        self.data = await HolidayRetriever().get_holidays(self.hass, self.region)
 
 
 

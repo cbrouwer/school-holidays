@@ -11,6 +11,6 @@ GLOBAL_REGION = "heel Nederland"
 
 
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(hours=2, minutes=0)
+MIN_TIME_BETWEEN_UPDATES = timedelta(hours=24, minutes=0)
 
 _LOGGER = logging.getLogger(__name__)

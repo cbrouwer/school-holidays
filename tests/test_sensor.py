@@ -12,4 +12,6 @@ async def test_states(hass: HomeAssistant, mocked_data):
 
     state = hass.states.get("sensor.school_holidays")
     assert state.state == "10.1"
+    
+    await unload_component(hass, config_entry)
 
