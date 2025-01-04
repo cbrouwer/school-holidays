@@ -24,10 +24,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     config = config_entry.data
-
-
     region = config.get(CONF_REGION).strip()
-
     data = SchoolHolidaysData(hass, region)
     await data.async_update()
 
@@ -59,9 +56,10 @@ class SchoolHolidays(Entity):
      ) -> None:
         """Initialize the sensor."""
         self._state = None
-        self.entity_id = "sensor.school_holidays"
+        self.entity_id = "sensor.school_holidays_" + data.region
+        self._attr_unique_id = f"schooldays_{data.region}"
         self.data = data
-        self.friendly_name = 'School holiday'
+        self.friendly_name = f"School holidays for {data.region}"
         self._state = None
         self._last_update = None
 

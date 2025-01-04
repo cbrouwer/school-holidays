@@ -14,7 +14,6 @@ from homeassistant import config_entries
 
 from .const import (
     _LOGGER,
-    CONF_ID,
     CONF_REGION,
     DOMAIN,
 )
@@ -39,28 +38,24 @@ class SchoolDaysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def _redo_configuration(self, entry_data: Mapping[str, Any]):
 
         schooldays_schema = vol.Schema({
-        vol.Required(CONF_ID, default=entry_data[CONF_ID]): str,
         vol.Required(CONF_REGION): SelectSelector(
                 SelectSelectorConfig(options=REGION)
             ),
         })
-        return self.async_show_form(
-                         step_id="reconfigure", data_schema=schooldays_schema)
+        return self.async_show_form(step_id="reconfigure", data_schema=schooldays_schema)
 
 
     async def async_step_user(self, info):
         if info is not None:
-
-            await self.async_set_unique_id(info["id"])
+            await self.async_set_unique_id(f"schooldays_{info[CONF_REGION]}")
             self._abort_if_unique_id_configured()
             return self.async_create_entry(
-                title="SchoolDays for " + info["id"],
+                title="SchoolDays for region " + info[CONF_REGION],
                 data=info
             )
 
         schooldays_schema = vol.Schema({
-        vol.Required(CONF_ID, default="home"): str,
-        vol.Required(CONF_REGION): SelectSelector(
+            vol.Required(CONF_REGION): SelectSelector(
                 SelectSelectorConfig(options=REGION)
             ),
         })

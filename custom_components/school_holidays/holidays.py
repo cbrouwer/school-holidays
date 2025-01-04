@@ -31,11 +31,11 @@ class HolidayRetriever(object):
         try:
             apiData = await SchoolDaysApi().call_api()
             holidays = []
-            for vacation in apiData['content'][0]['vacations']:
+            for vacation in apiData:
                 vacation_type = vacation['type'].strip()
                 start_date, end_date = self.get_dates_for_region(vacation, region)
                 if start_date and end_date:
-                    _LOGGER.debug(f"Found a holiday: {vacation_type} from {start_date} to {end_date}.")
+                    _LOGGER.info(f"Found a holiday: {vacation_type} from {start_date} to {end_date}.")
                     start_date = datetime.fromisoformat(start_date[:-1]).date()
                     end_date = datetime.fromisoformat(end_date[:-1]).date()
                     holidays.append(Holiday(vacation_type, start_date, end_date))
