@@ -5,7 +5,7 @@ Author: Chris Brouwer
 """
 from __future__ import annotations
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from homeassistant.components.sensor import Entity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
