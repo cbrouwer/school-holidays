@@ -10,6 +10,7 @@ from .api import SchoolDaysApi
 
 from .const import (
     _LOGGER,
+    GLOBAL_REGION
 )
 
 @dataclass
@@ -25,7 +26,7 @@ class HolidayRetriever(object):
         return schoolHolidays + publicHolidays
         
     async def get_school_holidays(self, region):
-        _LOGGER.debug(f"Retrieving national school holidays for {region}...")
+        _LOGGER.info(f"Retrieving national school holidays for {region}")
         
         try:
             apiData = await SchoolDaysApi().call_api()
@@ -34,11 +35,11 @@ class HolidayRetriever(object):
                 vacation_type = vacation['type'].strip()
                 start_date, end_date = self.get_dates_for_region(vacation, region)
                 if start_date and end_date:
-                    _LOGGER.debug(f"Found a holiday: {vacation_type} from {start_date} to {end_date}.")
+                    _LOGGER.info(f"Found a holiday: {vacation_type} from {start_date} to {end_date}.")
                     start_date = datetime.fromisoformat(start_date[:-1]).date()
                     end_date = datetime.fromisoformat(end_date[:-1]).date()
                     holidays.append(Holiday(vacation_type, start_date, end_date))
-            _LOGGER.debug(f"Found {len(holidays)} holidays")
+            _LOGGER.info(f"Found {len(holidays)} holidays")
             return holidays
         except Exception as exc:
             _LOGGER.error(
@@ -48,20 +49,20 @@ class HolidayRetriever(object):
     
 
     def get_public_holidays(self) -> list[Holiday]:
-        _LOGGER.debug(f"Retrieving public holidays...")
+        _LOGGER.info(f"Retrieving public holidays")
 
-        holiday_data = public_holidays.NL(years=2024).items()
+        current_year = datetime.now().year
+        holiday_data = public_holidays.NL(years=current_year).items()
         holidays = []
         for date, name in holiday_data:
-            _LOGGER.debug(f"Found public holiday: {name} {date}")
+            _LOGGER.info(f"Found public holiday: {name} {date}")
             holidays.append(Holiday(name, date, date))
         return holidays
             
         
     def get_dates_for_region(self, data: dict, region: str) -> tuple[date, date]:
         # Try to find preferred region first, then fallback to GLOBAL_REGION
-        region_priority = [region, "heel nederland"]
-
+        region_priority = [region, GLOBAL_REGION]
         return next(
             ((region['startdate'], region['enddate']) for region in data['regions']
             if region['region'].strip().lower() in region_priority),
