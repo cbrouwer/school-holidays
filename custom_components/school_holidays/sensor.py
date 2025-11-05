@@ -85,7 +85,7 @@ class SchoolHolidays(Entity):
         today = dt_util.now().date()
         is_holiday = any(today >= holiday.start_date  and today < holiday.end_date for holiday in self.data.holidays)
         
-        if in_holiday:
+        if is_holiday:
             self._state = "holiday"
             self._attr_icon = "mdi:beach"
         elif self.is_weekday():
