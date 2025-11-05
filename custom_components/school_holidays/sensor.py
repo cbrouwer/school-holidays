@@ -9,7 +9,7 @@ from datetime import datetime, date, timedelta
 from homeassistant.components.sensor import Entity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.util import Throttle
+from homeassistant.util import Throttle, dt as dt_util
 
 from .holidays import HolidayRetriever
 from .const import (
@@ -27,28 +27,29 @@ async def async_setup_entry(
     region = config.get(CONF_REGION).strip()
     data = SchoolHolidaysData(hass, region)
     await data.async_update()
-
-    entities = []
-    entities.append(SchoolHolidays(data))
-
-    async_add_entities(entities)
+    async_add_entities([SchoolHolidays(data)])
 
 
-class SchoolHolidaysData(object):
+class SchoolHolidaysData:
+    """Fetch and store holiday data for a given region."""
+
     def __init__(self, hass: HomeAssistant, region: str):
-        self.data = None
+        self.holidays = None
         self.hass = hass
         self.region = region
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
-        self.data = await HolidayRetriever().get_holidays(self.hass, self.region)
-
+        try:
+            self.holidays = await HolidayRetriever().get_holidays(self.hass, self.region)
+        except Exception as err:
+            _LOGGER.error("Error fetching holidays for %s: %s", self.region, err)
+            self.holidays = []
 
 
 class SchoolHolidays(Entity):
-    """Representation of a sensor."""
-    _attr_has_entity_name = True
+    """Representation of a school holiday sensor."""
+    _attr_has_entity_name = False
 
     def __init__(
         self,
@@ -56,39 +57,40 @@ class SchoolHolidays(Entity):
      ) -> None:
         """Initialize the sensor."""
         self._state = None
-        self.entity_id = "sensor.school_holidays_" + data.region
-        self._attr_unique_id = f"schooldays_{data.region}"
-        self.data = data
-        self.friendly_name = f"School holidays for {data.region}"
-        self._state = None
         self._last_update = None
-        self._icon = "mdi:beach"
-
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return 'School holiday'
+        self.data = data
+        self._attr_name = f"School holidays {data.region.capitalize()}"
+        self._attr_unique_id =f"schoolholidays_{data.region}"
+        self.friendly_name = f"School holidays for {data.region}"
+        self._attr_icon = "mdi:beach"
 
     @property
     def state(self):
         """Return the state of the sensor."""
         return self._state
     
-    @property
-    def icon(self):
-        return self._icon
+    def is_weekday(self) -> bool:
+        """Return True if today is a weekday."""
+        return dt_util.now().weekday() < 5
 
-    def is_weekday(self):
-        """Check if it is school day."""
-        now = datetime.today().weekday() < 5
-
-    @Throttle(timedelta(minutes=1))
     async def async_update(self) -> None:
         await self.data.async_update()
-        self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
+        self._last_update = dt_util.now().strftime("%d-%m-%Y %H:%M")
         
-        if (self.data.data):
-            today = datetime.today().date()
-            _LOGGER.debug("Checking for holidays for %s in %s", str(today), str(self.data.data))
-            self._state = any(today >= holiday.start_date  and today < holiday.end_date for holiday in self.data.data)
+        if not self.data.holidays:
+            self._state = "unknown"
+            return
+
+        
+        today = dt_util.now().date()
+        is_holiday = any(today >= holiday.start_date  and today < holiday.end_date for holiday in self.data.holidays)
+        
+        if in_holiday:
+            self._state = "holiday"
+            self._attr_icon = "mdi:beach"
+        elif self.is_weekday():
+            self._state = "school day"
+            self._attr_icon = "mdi:school"
+        else:
+            self._state = "weekend"
+            self._attr_icon = "mdi:calendar-weekend"
