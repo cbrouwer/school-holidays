@@ -62,6 +62,8 @@ class SchoolHolidays(Entity):
         self.friendly_name = f"School holidays for {data.region}"
         self._state = None
         self._last_update = None
+        self._icon = "mdi:beach"
+
 
     @property
     def name(self) -> str:
@@ -72,6 +74,10 @@ class SchoolHolidays(Entity):
     def state(self):
         """Return the state of the sensor."""
         return self._state
+    
+    @property
+    def icon(self):
+        return self._icon
 
     def is_weekday(self):
         """Check if it is school day."""

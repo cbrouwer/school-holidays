@@ -2,6 +2,7 @@
   "codeowners": ["@cbrouwer"],
   "config_flow": true,
   "documentation": "https://github.com/cbrouwer/school-holidays",
+  "issue_tracker": "https://github.com/cbrouwer/school-holidays/issues",
   "domain": "school_holidays",
   "iot_class": "cloud_polling",
   "name": "School Holidays",
